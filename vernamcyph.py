@@ -8,6 +8,12 @@ init(autoreset=True)
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+def print_header():
+    """Print the application header."""
+    print(f"{Fore.CYAN}{'=' * 50}")
+    print(f"{Fore.YELLOW}{Style.BRIGHT}           VERNAM CIPHER TOOL")
+    print(f"{Fore.CYAN}{'=' * 50}{Style.RESET_ALL}")
+
 def alphabetnums():
     alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
     return alphabet
@@ -77,7 +83,8 @@ def print_menu():
     menu = f"""
 {Fore.GREEN}[1]{Fore.WHITE} Encrypt a message
 {Fore.GREEN}[2]{Fore.WHITE} Decrypt a message
-{Fore.GREEN}[3]{Fore.WHITE} Exit
+{Fore.GREEN}[3]{Fore.WHITE} Help
+{Fore.GREEN}[4]{Fore.WHITE} Exit
     """
     print(menu)
 
@@ -87,6 +94,21 @@ def show_result(original, result, operation):
     print(f"{Fore.MAGENTA}{operation} text: {Fore.WHITE}{result}")
     print(f"{Fore.YELLOW}{'=' * 50}\n")
     input(f"{Fore.GREEN}Press Enter to continue...")
+
+def show_help():
+    clear_screen()
+    print_header()
+    print(f"\n{Fore.GREEN}{Style.BRIGHT}HELP INFORMATION")
+    print(f"{Fore.WHITE}The Vernam cipher is a substitution cipher that uses a key to shift letters in the alphabet.")
+    print(f"{Fore.WHITE}Each letter of the message is shifted based on the corresponding letter in the key.")
+    print(f"{Fore.WHITE}If the key is shorter than the message, it is repeated until it matches the message length.")
+    print(f"\n{Fore.YELLOW}Tips:")
+    print(f"{Fore.WHITE}- For true security, use a key that's as long as the message and truly random")
+    print(f"{Fore.WHITE}- The key should never be reused for multiple messages")
+    print(f"{Fore.WHITE}- Spaces are preserved but other special characters may not work correctly")
+    
+    input(f"\n{Fore.CYAN}Press Enter to return to main menu...{Style.RESET_ALL}")
+
 
 class VernamMain:
     @staticmethod   
@@ -130,7 +152,7 @@ class VernamMain:
                 decrypted = vernam_decryption(message, reference_key, getlist)
                 show_result(message, decrypted, "Decrypted")
             
-            elif choice == '3':
+            elif choice == '4':
                 clear_screen()
                 print(f"{Fore.CYAN}Thank you for using Vernam Cipher!\n")
                 break
