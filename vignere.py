@@ -148,6 +148,7 @@ def main():
 
         elif choice == '3':
             show_help()
+            
         elif choice == '4':  # Exit
             print("Goodbye!")
             break

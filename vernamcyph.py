@@ -152,6 +152,9 @@ class VernamMain:
                 decrypted = vernam_decryption(message, reference_key, getlist)
                 show_result(message, decrypted, "Decrypted")
             
+            elif choice == '3':
+                show_help()
+
             elif choice == '4':
                 clear_screen()
                 print(f"{Fore.CYAN}Thank you for using Vernam Cipher!\n")
