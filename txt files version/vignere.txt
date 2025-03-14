@@ -90,12 +90,12 @@ def get_valid_key():
             return key
         print(f"{Fore.RED}Error: Key must contain only alphabetic characters and cannot be empty.{Fore.RESET}")
 
-def show_results(original, key, result, operation_type):
+def show_results(original, key, result, operation_type, inverse_op):
     """Display operation results with formatting."""
     print(f"\n{Fore.CYAN}╔═══════════ RESULTS ═══════════╗{Fore.RESET}")
     print(f"{Fore.CYAN}║{Fore.RESET} {operation_type} completed successfully!")
     print(f"{Fore.CYAN}╠═════════════════════════════════╣{Fore.RESET}")
-    print(f"{Fore.CYAN}║{Fore.RESET} Original: {Fore.YELLOW}{original}{Fore.RESET}")
+    print(f"{Fore.CYAN}║{Fore.RESET} {inverse_op} Message: {Fore.YELLOW}{original}{Fore.RESET}")
     print(f"{Fore.CYAN}║{Fore.RESET} Key:      {Fore.YELLOW}{key}{Fore.RESET}")
     print(f"{Fore.CYAN}║{Fore.RESET} Result:   {Fore.GREEN}{result}{Fore.RESET}")
     print(f"{Fore.CYAN}╚═════════════════════════════════╝{Fore.RESET}")
@@ -103,6 +103,7 @@ def show_results(original, key, result, operation_type):
     try:
         pyperclip.copy(result)
         print(f"\n{Fore.GREEN}✓ Result copied to clipboard!{Fore.RESET}")
+        input(f"{Fore.GREEN}Press Enter to continue...{Fore.RESET}")
     except:
         pass
 
@@ -136,7 +137,7 @@ def main():
             key = get_valid_key()
             
             encrypted = vigenere_encrypt(message, key)
-            show_results(message, key, encrypted, "Encryption")
+            show_results(message, key, encrypted, "Encryption", "Original")
             
         elif choice == '2':  # Decrypt
             clear_screen()
@@ -145,6 +146,7 @@ def main():
             key = get_valid_key()
             
             decrypted = vigenere_decrypt(message, key)
+            show_results(message, key, decrypted, "Decryption", "Encrypted")
 
         elif choice == '3':
             show_help()

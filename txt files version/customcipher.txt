@@ -428,8 +428,8 @@ It uses the following, in a layered approach, to secure your data:
 
 {Fore.GREEN}[1]{Fore.WHITE} Encrypt a word
 {Fore.GREEN}[2]{Fore.WHITE} Decrypt a word
-{Fore.GREEN}[3]{Fore.WHITE} Encrypt a file
-{Fore.GREEN}[4]{Fore.WHITE} Decrypt a file
+{Fore.GREEN}[3]{Fore.WHITE} Encrypt a text file
+{Fore.GREEN}[4]{Fore.WHITE} Decrypt a text file
 {Fore.GREEN}[5]{Fore.WHITE} Help
 {Fore.GREEN}[6]{Fore.WHITE} Exit
 
@@ -556,6 +556,9 @@ It uses the following, in a layered approach, to secure your data:
                     EncryptionApp.display_result(False, "Passphrase cannot be empty")
                     input("\nPress Enter to continue...")
                     continue
+
+                input_path = os.path.abspath(input_path)
+                output_path = os.path.abspath(output_path)
                 
                 print(f"\n{Fore.CYAN}Encrypting file... Please wait.{Style.RESET_ALL}")
                 success = file_encryptor.encrypt_file(input_path, output_path, passphrase)
@@ -565,7 +568,7 @@ It uses the following, in a layered approach, to secure your data:
                                               f"Encrypted file saved to: {Fore.GREEN}{output_path}")
                 else:
                     EncryptionApp.display_result(False, "File Encryption Failed", 
-                                              "Please check file paths and permissions.")
+                                              "Please check file paths and permissions. Try 'Run as Administrator' if needed.")
                 
                 input("\nPress Enter to continue...")
             
@@ -591,6 +594,9 @@ It uses the following, in a layered approach, to secure your data:
                     input("\nPress Enter to continue...")
                     continue
                 
+                input_path = os.path.abspath(input_path)
+                output_path = os.path.abspath(output_path)
+
                 print(f"\n{Fore.CYAN}Decrypting file... Please wait.{Style.RESET_ALL}")
                 success, results = file_encryptor.decrypt_file(input_path, output_path, passphrase)
                 
@@ -617,7 +623,7 @@ It uses the following, in a layered approach, to secure your data:
                                                       f"Decrypted file saved to: {Fore.GREEN}{output_path}")
                 else:
                     EncryptionApp.display_result(False, "File Decryption Failed", 
-                                              "Please check if it's a valid encrypted file.")
+                                              "Please check if it's a valid encrypted file. Try 'Run as Administrator' if needed.")
                 
                 input("\nPress Enter to continue...")
                 
