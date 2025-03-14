@@ -1,16 +1,24 @@
-#!/usr/bin/env python3
-"""
-Enhanced Word Encryption Program
-This program allows users to encrypt words using multiple layers of security:
-1. Character shuffling based on a derived seed
-2. Vigenère cipher encryption
-3. Passphrase-based protection (single input for both seed and key)
-4. Cryptographic hashing for verification
-"""
-
 import hashlib
 import base64
 import hmac
+import os
+import time
+from colorama import init, Fore, Style, Back
+
+# Initialize colorama
+try:
+    init(autoreset=True)
+    HAS_COLOR = True
+except ImportError:
+    HAS_COLOR = False
+    class DummyColor:
+        def __getattr__(self, name):
+            return ''
+    Fore = Style = Back = DummyColor()
+
+def clear_screen():
+    """Clear the console screen."""
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 class WordEncryptor:
     """Class for handling word encryption and decryption operations with enhanced security."""
@@ -376,114 +384,220 @@ class EncryptionApp:
     """Class for handling the encryption application UI and workflow."""
     
     @staticmethod
+    def show_banner():
+        """Display a stylish banner for the application."""
+        banner = f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════╗
+{Fore.CYAN}║ {Fore.YELLOW}{Style.BRIGHT}             ENHANCED ENCRYPTION TOOL                {Fore.CYAN} ║
+{Fore.CYAN}╚══════════════════════════════════════════════════════════╝{Style.RESET_ALL}
+        """
+        print(banner)
+    
+    @staticmethod
+    def show_help():
+        """Display help information about the application."""
+        clear_screen()
+        EncryptionApp.show_banner()
+        
+        help_text = f"""
+{Fore.GREEN}{Style.BRIGHT}===== Enhanced Encryption Tool Help ====={Style.RESET_ALL}
+
+This program allows you to encrypt words and text files with enhanced security features.
+It uses the following, in a layered approach, to secure your data:
+
+{Fore.YELLOW}1.{Fore.WHITE} Shuffling of characters based on a derived seed
+{Fore.YELLOW}2.{Fore.WHITE} Vigenère cipher encryption with a passphrase-derived key  
+{Fore.YELLOW}3.{Fore.WHITE} Cryptographic hashing for verification of decrypted data
+
+{Fore.CYAN}{Style.BRIGHT}Available Options:{Style.RESET_ALL}
+{Fore.YELLOW}• Encrypt a word{Fore.WHITE} - Securely encrypt individual words
+{Fore.YELLOW}• Decrypt a word{Fore.WHITE} - Recover encrypted words using your passphrase
+{Fore.YELLOW}• Encrypt a file{Fore.WHITE} - Encrypt entire text files line by line
+{Fore.YELLOW}• Decrypt a file{Fore.WHITE} - Recover encrypted files with verification
+        """
+        print(help_text)
+        input(f"\n{Fore.GREEN}Press Enter to return to the main menu...{Style.RESET_ALL}")
+
+    @staticmethod
+    def display_menu():
+        """Display the main menu with styled options."""
+        EncryptionApp.show_banner()
+        
+        menu = f"""
+{Fore.CYAN}{Style.BRIGHT}Select an option:{Style.RESET_ALL}
+
+{Fore.GREEN}[1]{Fore.WHITE} Encrypt a word
+{Fore.GREEN}[2]{Fore.WHITE} Decrypt a word
+{Fore.GREEN}[3]{Fore.WHITE} Encrypt a file
+{Fore.GREEN}[4]{Fore.WHITE} Decrypt a file
+{Fore.GREEN}[5]{Fore.WHITE} Help
+{Fore.GREEN}[6]{Fore.WHITE} Exit
+
+{Fore.CYAN}{'─' * 50}{Style.RESET_ALL}
+        """
+        print(menu)
+    
+    @staticmethod
+    def display_progress(progress, total):
+        """Display a progress bar for file operations."""
+        bar_length = 40
+        filled_length = int(bar_length * progress // total)
+        bar = '█' * filled_length + '░' * (bar_length - filled_length)
+        percent = (progress / total) * 100
+        print(f"\r{Fore.CYAN}Progress: |{bar}| {percent:.1f}%", end='')
+    
+    @staticmethod
+    def display_result(success, message, details=None):
+        """Display an operation result with appropriate styling."""
+        print("\n" + "─" * 50)
+        if success:
+            print(f"{Fore.GREEN}{Style.BRIGHT}✓ {message}{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}{Style.BRIGHT}✗ {message}{Style.RESET_ALL}")
+        
+        if details:
+            print(f"{Fore.WHITE}{details}")
+        print("─" * 50)
+    
+    @staticmethod
     def run():
         """Run the encryption application."""
         encryptor = WordEncryptor()
         file_encryptor = FileEncryptor()
         
         while True:
-            print("\n===== Enhanced Encryption Tool =====")
-            print("1. Encrypt a word")
-            print("2. Decrypt a word")
-            print("3. Encrypt a file")
-            print("4. Decrypt a file")
-            print("5. Exit")
-            choice = input("\nEnter your choice (1-5): ")
+            clear_screen()
+            EncryptionApp.display_menu()
+            choice = input(f"{Fore.YELLOW}Enter your choice (1-6): {Style.RESET_ALL}")
 
-            if choice == '1':
-                word = input("Enter the word to encrypt: ")
+            if choice == '1':  # Encrypt a word
+                clear_screen()
+                print(f"{Fore.CYAN}{Style.BRIGHT}[ WORD ENCRYPTION ]{Style.RESET_ALL}\n")
+                
+                word = input(f"{Fore.YELLOW}Enter the word to encrypt: {Style.RESET_ALL}")
                 if not word:
-                    print("Word cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Word cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                     
-                passphrase = input("Enter your passphrase (will be used for decryption): ")
+                passphrase = input(f"{Fore.YELLOW}Enter your passphrase: {Style.RESET_ALL}")
                 if not passphrase:
-                    print("Passphrase cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Passphrase cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
+                
+                print(f"\n{Fore.CYAN}Encrypting...{Style.RESET_ALL}")
+                time.sleep(0.5)  # Small delay for visual effect
                 
                 encrypted, verification_hash = encryptor.encrypt(word, passphrase)
                 
-                print("\nEncryption Results:")
-                print(f"Original word: {word}")
-                print(f"Encrypted word: {encrypted}")
-                print(f"Verification hash: {verification_hash}")
-                print("\nStore both the encrypted word and verification hash to decrypt later.")
+                EncryptionApp.display_result(True, "Encryption Complete", 
+                                           f"Original: {Fore.WHITE}{word}\n"
+                                           f"Encrypted: {Fore.YELLOW}{encrypted}\n"
+                                           f"Verification Hash: {Fore.CYAN}{verification_hash}")
+                input("\nPress Enter to continue...")
                 
-            elif choice == '2':
-                encrypted_word = input("Enter the encrypted word: ")
+            elif choice == '2':  # Decrypt a word
+                clear_screen()
+                print(f"{Fore.CYAN}{Style.BRIGHT}[ WORD DECRYPTION ]{Style.RESET_ALL}\n")
+                
+                encrypted_word = input(f"{Fore.YELLOW}Enter the encrypted word: {Style.RESET_ALL}")
                 if not encrypted_word:
-                    print("Encrypted word cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Encrypted word cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                     
-                verification_hash = input("Enter the verification hash: ")
+                verification_hash = input(f"{Fore.YELLOW}Enter the verification hash: {Style.RESET_ALL}")
                 if not verification_hash:
-                    print("Verification hash cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Verification hash cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                     
-                passphrase = input("Enter your passphrase: ")
+                passphrase = input(f"{Fore.YELLOW}Enter your passphrase: {Style.RESET_ALL}")
                 if not passphrase:
-                    print("Passphrase cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Passphrase cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
+                
+                print(f"\n{Fore.CYAN}Decrypting...{Style.RESET_ALL}")
+                time.sleep(0.5)  # Small delay for visual effect
                 
                 decrypted_word, is_verified = encryptor.decrypt(encrypted_word, passphrase, verification_hash)
                 
-                print("\nDecryption Results:")
-                print(f"Encrypted word: {encrypted_word}")
-                print(f"Decrypted word: {decrypted_word}")
-                
                 if is_verified:
-                    print("\n✅ Verification successful! The decrypted word is authentic.")
+                    EncryptionApp.display_result(True, "Decryption and Verification Successful", 
+                                              f"Encrypted: {Fore.YELLOW}{encrypted_word}\n"
+                                              f"Decrypted: {Fore.GREEN}{decrypted_word}")
                 else:
-                    print("\n⚠️ Verification failed! Either the passphrase is incorrect or the data has been tampered with.")
+                    EncryptionApp.display_result(False, "Verification Failed", 
+                                              f"Encrypted: {Fore.YELLOW}{encrypted_word}\n"
+                                              f"Decrypted: {Fore.RED}{decrypted_word}\n"
+                                              f"The passphrase may be incorrect or the data has been tampered with.")
+                input("\nPress Enter to continue...")
             
-            elif choice == '3':
-                input_path = input("Enter the path of the file to encrypt: ")
+            elif choice == '3':  # Encrypt a file
+                clear_screen()
+                print(f"{Fore.CYAN}{Style.BRIGHT}[ FILE ENCRYPTION ]{Style.RESET_ALL}\n")
+                
+                input_path = input(f"{Fore.YELLOW}Enter the path of the file to encrypt: {Style.RESET_ALL}")
                 if not input_path:
-                    print("File path cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "File path cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                 
-                output_path = input("Enter the path for the encrypted file: ")
+                output_path = input(f"{Fore.YELLOW}Enter the path for the encrypted file: {Style.RESET_ALL}")
                 if not output_path:
-                    print("Output path cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Output path cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                 
-                passphrase = input("Enter your passphrase (will be used for decryption): ")
+                passphrase = input(f"{Fore.YELLOW}Enter your passphrase: {Style.RESET_ALL}")
                 if not passphrase:
-                    print("Passphrase cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Passphrase cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                 
-                print("\nEncrypting file... Please wait.")
+                print(f"\n{Fore.CYAN}Encrypting file... Please wait.{Style.RESET_ALL}")
                 success = file_encryptor.encrypt_file(input_path, output_path, passphrase)
                 
                 if success:
-                    print(f"\n✅ File encrypted successfully and saved to: {output_path}")
+                    EncryptionApp.display_result(True, "File Encryption Complete", 
+                                              f"Encrypted file saved to: {Fore.GREEN}{output_path}")
                 else:
-                    print("\n⚠️ File encryption failed. Please check file paths and permissions.")
+                    EncryptionApp.display_result(False, "File Encryption Failed", 
+                                              "Please check file paths and permissions.")
+                
+                input("\nPress Enter to continue...")
             
-            elif choice == '4':
-                input_path = input("Enter the path of the encrypted file: ")
+            elif choice == '4':  # Decrypt a file
+                clear_screen()
+                print(f"{Fore.CYAN}{Style.BRIGHT}[ FILE DECRYPTION ]{Style.RESET_ALL}\n")
+                
+                input_path = input(f"{Fore.YELLOW}Enter the path of the encrypted file: {Style.RESET_ALL}")
                 if not input_path:
-                    print("File path cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "File path cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                 
-                output_path = input("Enter the path for the decrypted file: ")
+                output_path = input(f"{Fore.YELLOW}Enter the path for the decrypted file: {Style.RESET_ALL}")
                 if not output_path:
-                    print("Output path cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Output path cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                 
-                passphrase = input("Enter your passphrase: ")
+                passphrase = input(f"{Fore.YELLOW}Enter your passphrase: {Style.RESET_ALL}")
                 if not passphrase:
-                    print("Passphrase cannot be empty. Please try again.")
+                    EncryptionApp.display_result(False, "Passphrase cannot be empty")
+                    input("\nPress Enter to continue...")
                     continue
                 
-                print("\nDecrypting file... Please wait.")
+                print(f"\n{Fore.CYAN}Decrypting file... Please wait.{Style.RESET_ALL}")
                 success, results = file_encryptor.decrypt_file(input_path, output_path, passphrase)
                 
                 if success:
-                    print(f"\n✅ File decrypted and saved to: {output_path}")
-                    
                     if "error" in results:
-                        print(f"⚠️ Error: {results['error']}")
+                        EncryptionApp.display_result(False, "File Decryption Error", 
+                                                  f"Error: {results['error']}")
                     else:
                         total_lines = results["total"]
                         verified_lines = results["verified"]
@@ -491,20 +605,38 @@ class EncryptionApp:
                         
                         if total_lines > 0:
                             success_rate = (verified_lines / total_lines) * 100
-                            print(f"Verification summary: {verified_lines}/{total_lines} lines verified ({success_rate:.1f}%)")
+                            details = f"Decrypted file saved to: {Fore.GREEN}{output_path}\n" \
+                                     f"Verification summary: {verified_lines}/{total_lines} lines verified ({success_rate:.1f}%)"
                             
                             if failed_lines > 0:
-                                print(f"⚠️ Warning: {failed_lines} lines failed verification. The passphrase may be incorrect or the file corrupted.")
+                                details += f"\n{Fore.RED}Warning: {failed_lines} lines failed verification."
+                                
+                            EncryptionApp.display_result(True, "File Decryption Complete", details)
+                        else:
+                            EncryptionApp.display_result(True, "File Decryption Complete", 
+                                                      f"Decrypted file saved to: {Fore.GREEN}{output_path}")
                 else:
-                    print("\n⚠️ File decryption failed. Please check if it's a valid encrypted file.")
+                    EncryptionApp.display_result(False, "File Decryption Failed", 
+                                              "Please check if it's a valid encrypted file.")
                 
-            elif choice == '5':
-                print("Thank you for using the Enhanced Encryption Tool. Goodbye!")
+                input("\nPress Enter to continue...")
+                
+            elif choice == '5':  # Help
+                EncryptionApp.show_help()
+                
+            elif choice == '6':  # Exit
+                clear_screen()
+                print(f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════╗
+{Fore.CYAN}║ {Fore.YELLOW}{Style.BRIGHT}        Thank you for using this application!        {Fore.CYAN} ║
+{Fore.CYAN}╚══════════════════════════════════════════════════════════╝{Style.RESET_ALL}
+                """)
+                time.sleep(1.5)
                 break
                 
             else:
-                print("Invalid choice. Please enter a number from 1-5.")
-
+                print(f"{Fore.RED}Invalid choice. Please enter a number from 1-6.{Style.RESET_ALL}")
+                time.sleep(1)
 
 if __name__ == "__main__":
     EncryptionApp.run()
